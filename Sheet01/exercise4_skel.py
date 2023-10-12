@@ -2,7 +2,7 @@ import numpy as np
 
 """Skeleton for exercise 4 of exercise sheet 1"""
 
-class ReLU():
+class ReLU:
 
     """Implementation of the ReLU activation function."""
 
