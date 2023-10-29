@@ -68,6 +68,9 @@ class FeedforwardNet:
         # Iterate through each layer, compute the            #
         # affine linear combination and activate the result. #
         ######################################################
+        for i in range(0, len(self.layers)-1):
+             x = self.afuns[i](self.weights[i] @ x + self.biases[i])
+        return x
 
     def set_weights(self, W: np.ndarray, index: int) -> None:
         """
@@ -184,3 +187,23 @@ class FeedforwardNet:
             plt.show()
         else:
             fig.savefig(file_name, bbox_inches='tight', format='pdf')
+
+
+#Test of this implementation:
+
+w_1 = np.array([[-1, -1],\
+                [-1,  1],\
+                [ 1, -1],\
+                [ 1,  1]])
+b_1 = np.array([[ 1],\
+               [ 0],\
+               [ 0],\
+               [-1]])
+
+instance = FeedforwardNet([2, 4, 1])
+instance.set_weights(w_1, 0)
+instance.set_bias(b_1, 0)
+instance.set_weights(np.array([[0,1,1,0]]), 1)
+instance.set_bias(np.array([[0]]), 1)
+print(instance([[1],[0]]))
+#verdict: works, but dimensionality of all involved variables needs to be more carefully considered!

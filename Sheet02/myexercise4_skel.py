@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numpy.typing import ArrayLike
 from tensorflow.keras.datasets import mnist
-from feedforward import FeedforwardNet
+from myfeedforward_skel import FeedforwardNet
 
 def load_mnist() -> tuple[tuple[np.ndarray, np.ndarray],
                           tuple[np.ndarray, np.ndarray]]:
@@ -66,7 +66,7 @@ def load_parameters() -> tuple[tuple[ArrayLike, ArrayLike],
         Bias for the output layer.
     """
     
-    data = np.load('MNIST_params.npz') 
+    data = np.load('Sheet02/MNIST_params.npz') 
     return (data['W1'], data['b1']), (data['W2'], data['b2'])
 
 def get_model() -> FeedforwardNet:
@@ -87,16 +87,18 @@ def get_model() -> FeedforwardNet:
     # TODO Load weights and biases. Note that the weights
     # have to be transposed in order to use them and an
     # additional axis has to be added to the biases
-    (W1, b1), (W2, b2) = (None, None), (None, None)
+    (W1, b1), (W2, b2) = load_parameters()
 
     # TODO Create network with one hidden layer of size 100
     # and an output layer of size 10.
-    model = None
+    model = FeedforwardNet([784, 100, 10])
 
     # TODO Set the weights and the bias of the hidden layer
-
+    model.set_weights(np.transpose(W1), 0)
+    model.set_bias(np.reshape(b1, (100, 1)), 0)
     # TODO Set the weights and the bias of the output layer
-
+    model.set_weights(np.transpose(W2), 1)
+    model.set_bias(np.reshape(b2, (10, 1)), 1)
     return model
 
 if __name__ == '__main__':
@@ -125,3 +127,7 @@ if __name__ == '__main__':
         plt.imshow(x_test[:, k].reshape(28, 28), cmap='gray_r')
         plt.title(f'Label = {y_test[k]}, prediction = {y_test[k]}')
         plt.pause(1)
+
+#visible differences include the format of the provided parameters. In our implementation, we multiply the inputs onto the weight matrix from the right
+# while keras apparently uses column vectors representing the layers, and conceptually multiplies the columns of W with the input, which is a row
+# vector. Additionally, the layer values are row vectors as well, s.t. the biases are row vectors as well. Other than that, mostly the same old stuff.

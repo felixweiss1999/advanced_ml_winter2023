@@ -150,7 +150,7 @@ def plot_mnist(
         plt.show()
 
 if __name__ == '__main__':
-
+    print(tf.config.list_physical_devices())
     """
     Train a FNN with one hidden layer on the MNIST dataset.
     """
@@ -163,7 +163,7 @@ if __name__ == '__main__':
     #########################################################
     # TODO Generate the network with the get_model function #
     #########################################################
-    model = None
+    model = get_model(100, "relu", "linear")
 
     # Train the model. In TensorFlow/Keras the training is
     # implemented in the fit method.
