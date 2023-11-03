@@ -65,8 +65,8 @@ def load_parameters() -> tuple[tuple[ArrayLike, ArrayLike],
     b2: ArrayLike
         Bias for the output layer.
     """
-    
-    data = np.load('MNIST_params.npz') 
+
+    data = np.load('MNIST_params.npz')
     return (data['W1'], data['b1']), (data['W2'], data['b2'])
 
 def get_model() -> FeedforwardNet:

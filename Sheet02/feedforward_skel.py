@@ -1,4 +1,4 @@
-"""First implementation of a FNN"""
+"""First implementation of an FNN"""
 
 __author__ = 'Jens-Peter M. Zemke, Jonas Grams'
 __version__ = '1.1'
@@ -18,7 +18,7 @@ class FeedforwardNet:
     Attributes
     ----------
     layers: np.ndarray
-        Array filled with the number of neurons for 
+        Array filled with the number of neurons for
         each layer.
     weights : list[np.ndarray]
         List of weight matrices of the network.
@@ -39,6 +39,7 @@ class FeedforwardNet:
             of inputs of the network and the last entry is the
             number of outputs of the network.
         """
+        # Initialize network structure
         self.layers = np.array(layers)
         self.weights = [np.zeros((m, n)) for m, n in zip(layers[1:], layers[:-1])]
         self.biases = [np.zeros((m, 1)) for m in layers[1:]]
@@ -93,8 +94,8 @@ class FeedforwardNet:
             raise ValueError("Index out of bounds!")
         if not self.weights[index].shape == W.shape:
             raise ValueError("The shape of the new weight matrix "
-                             "does not match the size of the "
-                             f"layers. It should be {self.weights[index].shape}, "
+                             "does not match the size of the layers. "
+                             f"It should be {self.weights[index].shape}, "
                              f"but is {W.shape}.")
 
         self.weights[index] = W
@@ -124,8 +125,8 @@ class FeedforwardNet:
             raise ValueError("Index out of bounds!")
         if not self.biases[index].shape == b.shape:
             raise ValueError("The shape of the new bias "
-                             "does not match the size of the "
-                             f"layer. It should be {self.biases[index].shape}, "
+                             "does not match the size of the layer."
+                             f"It should be {self.biases[index].shape}, "
                              f"but is {b.shape}")
 
         self.biases[index] = b
@@ -166,7 +167,9 @@ class FeedforwardNet:
         for i in range(num_layers-1):
             for j in range(self.layers[i]):
                 for k in range(self.layers[i+1]):
-                    angle = np.arctan((j - k + y_shift[i+1] - y_shift[i]) / dist)
+                    angle = \
+                      np.arctan((j - k + y_shift[i+1] - y_shift[i]) \
+                                / dist)
                     x_adjust = rad * np.cos(angle)
                     y_adjust = rad * np.sin(angle)
                     line = plt.Line2D((i * dist + x_adjust,
