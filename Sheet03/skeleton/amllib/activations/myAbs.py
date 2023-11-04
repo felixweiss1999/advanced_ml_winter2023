@@ -138,5 +138,9 @@ class myAbs(Activation):
             raise ValueError('The feedforward method was not'
                              'called previously. No data'
                              'for backpropagation available')
-
+        # IMPORTANT: this is computing the delta_i vector!!! the self.data attribute is local to a specific LAYER!!!
+        # we have one activation function object for every layer!! So this is all local to one layer! Note also that in the
+        # slides, the round ° thingy is componentwise multiplication, not some dot product or whatever
+        # self.data = z_m-1, delta = a_m - y. These two are vectors of the same dimension!
+        # also, the returned vector equals the derivative of the Cost function w.r.t. 
         return np.sign(self.data) * delta

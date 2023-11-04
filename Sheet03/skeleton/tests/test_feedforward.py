@@ -3,7 +3,7 @@ import importlib.resources
 import numpy as np
 
 from amllib.activations import ReLU
-from amllib.networks import FeedforwardNet
+from amllib.networks import MyFeedforwardNet
 from amllib.utils import mnist
 
 if __name__ == '__main__':
@@ -28,8 +28,9 @@ if __name__ == '__main__':
     # you should reach an accuracy above 70%. Try more #
     # than once, the weights are initialized randomly. #
     ####################################################
-    model = None
+    model = MyFeedforwardNet([784, 100, 10])
+    model.train(x=x_train.transpose(), y=labels.transpose(), batch_size=12, epochs=10, learning_rate=0.02)
 
-    y_tilde = np.argmax(model(x_test.T), axis=0)
+    y_tilde = np.argmax(model(x_test.transpose()), axis=0)
     accuracy = np.sum(y_tilde == y_test) / 10000
     print(f'Accuracy: {accuracy * 100}%')

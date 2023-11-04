@@ -10,4 +10,5 @@ __name__ = 'amllib.networks'
 __package__ = 'amllib.networks'
 
 from .feedforward import FeedforwardNet
+from .myfeedforward import MyFeedforwardNet
 
