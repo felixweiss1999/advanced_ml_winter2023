@@ -1,0 +1,6 @@
+Metadata-Version: 2.1
+Name: amllib
+Version: 1.1
+Summary: Machine learning libraryfor the lecture "AdvancedMachine Learning"
+Author: Jens-Peter M. Zemke, Jonas Grams
+Requires-Python: >=3.9
