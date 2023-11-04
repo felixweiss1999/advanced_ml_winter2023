@@ -1,11 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from amllib.activations import ReLU
+from amllib.activations import myAbs
 
 if __name__ == '__main__':
 
     # generate activation function of class ReLU
-    f = ReLU()
+    f = myAbs()
 
     # evaluate activation function and derivative
     x = np.linspace(-5, 5, 1001)
@@ -26,3 +27,4 @@ if __name__ == '__main__':
     plt.ylabel('y-axis')
     plt.title(f'Activation function {f.name} w/ derivative')
     plt.show()
+    input()

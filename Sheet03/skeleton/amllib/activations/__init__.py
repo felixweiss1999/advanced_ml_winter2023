@@ -13,3 +13,4 @@ from .activation import Activation
 
 # Import ReLU activation function
 from .relu import ReLU
+from .myAbs import myAbs
