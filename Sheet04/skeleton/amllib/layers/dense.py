@@ -180,9 +180,11 @@ class Dense(Layer):
             self.build(a.shape[1:])
 
         # TODO Cache data for backpropagation (inputs and affine linear combinations)
-
+        # Note to self: apparently we are really meant to cache the INPUT (param a of function) to this call ? and not the computed output activation lol?
+        self.__a = a
+        self.__z = a @ self.W + self.b
         # TODO Return the activated output.
-        return None
+        return self.afun(self.__z)
 
     def set_weights(self, W: np.ndarray) -> None:
         """
@@ -250,11 +252,17 @@ class Dense(Layer):
 
         # TODO  Implement the backpropagation:
         # 1. finish the computation of delta,
+        # note: this multiply should be componentwise!!
+        assert self.W.size[0] == delta.size
+        delta_for_this_layer = self.afun.derive(self.__z) * ( delta @ self.W ) # I hope its delta @ self.W now, because delta is row vector!
+        assert delta_for_this_layer.size == self.__z.size
         # 2. compute the weight matrix updates,
+        self.dW = delta_for_this_layer @ np.transpose(self.__a)
+        print(f"size of weights and weight updates for this layer: ",self.W.size, self.dW.size)
         # 3. compute the bias update
-
+        self.db = delta_for_this_layer
         # TODO Return modified delta
-        return None
+        return delta_for_this_layer
 
     def get_output_shape(self) -> tuple[int]:
         """
@@ -279,3 +287,5 @@ class Dense(Layer):
         # TODO Update the weights and bias with the SGD method
         # Note that the learning rate is stored in the attribute
         # learning_rate.
+        self.W -= self.dW
+        self.b -= self.db

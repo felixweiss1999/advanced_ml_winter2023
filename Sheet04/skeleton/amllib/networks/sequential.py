@@ -61,7 +61,9 @@ class Sequential:
         """
 
         # TODO Implement the layer-wise feedforward evaluation of the network
-        pass
+        for layer in self.layers:
+            input = layer(input)
+        return input
 
     def feedforward(self, input: np.ndarray) -> np.ndarray:
         """
@@ -82,7 +84,10 @@ class Sequential:
             the layers list.
         """
         # TODO Implement the layer-wise feedforward evaluation of the network
-        pass
+        for layer in self.layers:
+            input = layer.feedforward(input)
+        return input
+
 
     def backprop(self, input: np.ndarray, labels: np.ndarray) -> None:
         """
@@ -121,6 +126,10 @@ class Sequential:
         # Compute derivative of the cost function by the output of the network as
         # intial input for the backpropagation method of the last layer.
         # Then propagate backwards through all layers.
+        _, k = input.shape #as in solution to sheet 3, initialize backpropagation. input param is one batch.
+        delta = (self.feedforward(input) - labels) / k
+        for layer in reversed(self.layers):
+            delta = layer.backprop(delta) #these calls take care of update computation for us. not as in sheet3, where everything was exposed at this point.
 
     def train(self, train_input: np.ndarray, train_labels: np.ndarray, batch_size: int = 1, epochs: int = 10) -> None:
         """
