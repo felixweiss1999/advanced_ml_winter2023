@@ -43,4 +43,9 @@ class RandnOrthonormal(KernelInitializer):
     # TODO Initialize a random orthonormal matrix.
     # Use numpy.random.randn to initialize a random matrix
     # and then numpy.linalg.svd to obtain an orthonormal matrix from it.
-
+    A = np.random.randn(m,n)
+    U, SUM, V_transposed = np.linalg.svd(A, full_matrices=False)
+    if(m >= n):
+      return U
+    else:
+      return V_transposed

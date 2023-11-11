@@ -194,6 +194,7 @@ class MyFeedforwardNet:
             a = self.afuns[i].feedforward(z)
             self.__a[i+1] = a
         return a
+        #comment after looking at sol: should be correct
 
 
     def backprop(self, x: np.ndarray, y: np.ndarray) -> None:
@@ -228,6 +229,7 @@ class MyFeedforwardNet:
             delta = self.afuns[i-1].backprop(np.transpose(self.weights[i]) @ delta)
             self.dW[i-1] = delta @ np.transpose(self.__a[i-1])
             self.db[i-1] = delta
+        #comment after looking at sol: kein bock mir das anzugucken, im zweifel einfach von solution kopieren.
 
     def update(self, learning_rate: float = 0.01) -> None:
         """

@@ -49,3 +49,4 @@ class RandAverage(KernelInitializer):
         # Use the numpy.random.rand function to obtain a matrix with entries uniformly
         # distributed on the interval [0,1], and scale and shift the entries to
         # obtain the distribution on a different interval.
+        return np.random.randn(m,n) * np.sqrt(2/(m+n))

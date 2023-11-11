@@ -48,3 +48,4 @@ class RandnAverage(KernelInitializer):
         # Use numpy.random.randn to obtain entries normal distributed with mean 0 and
         # standard deviation 1. Shift the results to obtain a different mean, and scale
         # them to obtain a different standard deviation.
+        return (np.random.rand(m,n) - 0.5) * np.sqrt(6/(m+n))
