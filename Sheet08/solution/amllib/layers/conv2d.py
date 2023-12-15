@@ -237,7 +237,7 @@ class Conv2D(Layer):
     def evaluate_fft(self, a: np.ndarray) -> np.ndarray:
         """
           Evaluate the layer, where the convolutions are
-          computed with FFT's.
+          computed with FFTs.
 
           Parameters
           ----------
@@ -249,14 +249,32 @@ class Conv2D(Layer):
           np.ndarray
               Output array.
         """
-        # TODO Implement the evaluation of the CNN layer with the FFT approach
-        # (See lecture notes, p. 112-113). This can be done by
-        # - transforming a and self.f with a 2d DFT (numpy.fft.rfft2)
-        # - computing the componentwise product of the transformed input an filter
-        # - transforming the result back with an IDFT (this yields the full convolution)
-        # - restricting the result of the previous step to the valid convolution
 
-        pass
+        n, c, h, w = a.shape
+        m, fh, fw = self.fshape
+        dh, dw = fh - 1, fw - 1
+        zh, zw = h - dh, w - dw
+
+        # Apply FFT
+        a_hat = rfft2(a, (h + dh, w + dw))
+        f_hat = rfft2(self.f, (h + dh, w + dw))
+
+        z = np.zeros((n, m, zh, zw))
+        for i in range(n):
+            for j in range(m):
+
+
+                #Compute the full convolution with applying
+                #the componentwise product of a_hat and f_hat.
+                #z_hat then has the shape (c, h+dh, w+dw) and has
+                #to be restricted and summed over all channels.
+                z_hat = irfft2(a_hat[i, :, :, :] *
+                               f_hat[j, :, :, :],
+                               (h + dh, w + dw))
+                z[i, j, :, :] = self.b[j] + \
+                    z_hat[:, dh:dh+zh, dw:dw+zw].sum(axis=0)
+
+        return self.afun(z)
 
     def evaluate_im2col(self, a: np.ndarray) -> np.ndarray:
         """
@@ -277,13 +295,13 @@ class Conv2D(Layer):
         m, fh, fw = self.fshape
         zh, zw = h - fh + 1, w - fw + 1
 
-        # TODO create im2col matrix with amllib.utils.im2col
+        # Create im2col matrix
+        a_col = im2col(a, fh, fw)
+        # reshape filterbank
+        f_row = self.f[:, :, ::-1, ::-1].reshape(m, -1)
 
-        # TODO reshape filterbank to a m by c*fh*fw matrix
-
-        # TODO Compute Matrix product
         # BLAS Level 3: GEMM
-        z_mat = None
+        z_mat = f_row @ a_col + self.b.reshape(-1, 1)
 
         # reshape
         z = z_mat.reshape(m, n, zh, zw).transpose(1, 0, 2, 3)
@@ -379,7 +397,7 @@ class Conv2D(Layer):
     def feedforward_fft(self, a: np.ndarray) -> np.ndarray:
         """
           Evaluate the layer, where the convolutions are
-          computed with FFT's.
+          computed with FFTs.
 
           Parameters
           ----------
@@ -392,15 +410,33 @@ class Conv2D(Layer):
               Output array.
         """
 
-        # TODO Implement the evaluation of the CNN layer with the FFT approach
-        # (See lecture notes, p. 112-113). This can be done by
-        # - transforming a and self.f with a 2d DFT (numpy.fft.rfft2)
-        # - computing the componentwise product of the transformed input an filter
-        # - transforming the result back with an IDFT (this yields the full convolution)
-        # - restricting the result of the previous step to the valid convolution
-        # Cache the non-activated convolution for the backpropagation, and use
-        # self.afun.feedforward to activate the output.
-        pass
+        self.__a = a
+
+        n, c, h, w = a.shape
+        m, fh, fw = self.fshape
+        dh, dw = fh - 1, fw - 1
+        zh, zw = h - dh, w - dw
+
+        # Apply FFT
+        a_hat = rfft2(a, (h + dh, w + dw))
+        f_hat = rfft2(self.f, (h + dh, w + dw))
+
+        self.__z = np.zeros((n, m, zh, zw))
+        for i in range(n):
+            for j in range(m):
+
+
+                #Compute the full convolution with applying
+                #the componentwise product of a_hat and f_hat.
+                #z_hat then has the shape (c, h+dh, w+dw) and has
+                #to be restricted and summed over all channels.
+                z_hat = irfft2(a_hat[i, :, :, :] *
+                               f_hat[j, :, :, :],
+                               (h + dh, w + dw))
+                self.__z[i, j, :, :] = self.b[j] + \
+                    z_hat[:, dh:dh+zh, dw:dw+zw].sum(axis=0)
+
+        return self.afun.feedforward(self.__z)
 
     def feedforward_im2col(self, a: np.ndarray) -> np.ndarray:
         """
@@ -423,16 +459,14 @@ class Conv2D(Layer):
         m, fh, fw = self.fshape
         zh, zw = h - fh + 1, w - fw + 1
 
-        # TODO create im2col matrix with amllib.utils.im2col
+        # Create im2col matrix
+        a_col = im2col(a, fh, fw)
+        # reshape filterbank
+        f_row = self.f[:, :, ::-1, ::-1].reshape(m, -1)
+        self.cache = a_col, f_row
 
-        # TODO reshape filterbank to a m by c*fh*fw matrix
-
-        # TODO Cache both matrices
-        self.cache = None
-
-        # TODO Compute Matrix product
         # BLAS Level 3: GEMM
-        z_mat = None
+        z_mat = f_row @ a_col + self.b.reshape(-1, 1)
 
         # reshape
         self.__z = z_mat.reshape(m, n, zh, zw).transpose(1, 0, 2, 3)
@@ -487,7 +521,7 @@ class Conv2D(Layer):
 
     def backprop_fft(self, delta):
         """
-        Backpropagation for the evaluation with FFT's.
+        Backpropagation for the evaluation with FFTs.
 
         The derivatives of the cost function by the filter bank,
         the bias and the input are computed from the derivative of
