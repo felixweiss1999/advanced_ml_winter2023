@@ -11,9 +11,8 @@ T[n-1, n-1] = n
 b = np.eye(n, 1).reshape(n)
 
 def compute_eta(p, g):
-
-    # TODO Implement the computation of the step length
-    # that minimizes the 2-norm of the next gradient
+    Tp = T @ p
+    eta = - np.dot(Tp, g) / np.dot(Tp, Tp)
     return eta
 
 def newton(x0: np.ndarray, m: int) -> tuple[np.ndarray, np.ndarray]:
@@ -45,12 +44,17 @@ def newton(x0: np.ndarray, m: int) -> tuple[np.ndarray, np.ndarray]:
     x = x0
     err = np.zeros(m+1, dtype=float)
     err[0] = np.linalg.norm(x-1)
+    H = T
     for k in range(m):
-
-        # TODO Implement the loop of Newton's method.
-        # See, e.g., p. 57 of the lecture notes for more information.
-        pass
-
+        g = T @ x - b
+        p = np.linalg.solve(H, -g)
+        if np.linalg.norm(p) == 0:
+            k = m
+            break
+        eta = compute_eta(p, g)
+        s = p * eta
+        x = x + s
+        err[k+1] = np.linalg.norm(x-1)
     return x, err
 
 def bfgs(x0: np.ndarray, m: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -88,10 +92,19 @@ def bfgs(x0: np.ndarray, m: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     I = np.eye(n)
     H = I
     for k in range(m):
-        # TODO Implement the loop of the BFGS method.
-        # See, e.g., p. 144 of the lecture notes, or
-        # https://en.wikipedia.org/wiki/Broyden%E2%80%93Fletcher%E2%80%93Goldfarb%E2%80%93Shanno_algorithm
-        pass
+        g = T @ x - b
+        p = -H @ g
+        if np.linalg.norm(p) == 0:
+            k = m
+            break
+        eta = compute_eta(p, g)
+        s = p * eta
+        x = x + s
+        err[k+1] = np.linalg.norm(x-1)
+        y = T @ s
+        rho = 1.0 / np.dot(s, y)
+        P = I - rho * np.outer(s, y)
+        H = P @ H @ P.T + rho * np.outer(s, s)
     return x, err, H
 
 def get_lbfgs_update(k: int, Y: np.ndarray, S: np.ndarray, rho: np.ndarray,
@@ -134,20 +147,16 @@ def get_lbfgs_update(k: int, Y: np.ndarray, S: np.ndarray, rho: np.ndarray,
     p = -g
     alpha = np.zeros(k)
     for j in range(k-1, max(-1, k-m), -1):
-        # TODO Apply the backwards iteration
-        # of the Algorithm from the exercise
-        # sheet.
-        pass
+        alpha[j] = rho[j] * np.dot(S[:, j], p)
+        p = p - Y[:, j] * alpha[j]
 
     if (k > 0) & modified:
-        # TODO multiply p with gamma != 1
-        # if the modified flag is set to True.
-        pass
+        p = p * np.dot(S[:, k-1], Y[:, k-1]) / \
+            np.dot(Y[:, k-1], Y[:, k-1])
 
     for j in range(max(0, k-m), k):
-        # TODO Apply the forward iteration of
-        # the algorithm from the exercise sheet.
-        pass
+        alpha[j] = alpha[j] - rho[j] * np.dot(Y[:, j], p)
+        p = p + S[:, j] * alpha[j]
 
     return p
 
@@ -187,9 +196,20 @@ def lbfgs(x0: np.ndarray, m: int, steps: int, modified: bool = False) -> tuple[n
     Y = np.zeros((n, m))
     S = np.zeros((n, m))
     for k in range(m):
-        # TODO Implement the loop for the L-BFGS method.
-        pass
-
+        g = T @ x - b
+        p = get_lbfgs_update(k, Y, S, rhovec, g, steps, modified=modified)
+        if np.linalg.norm(p) == 0:
+            k = m
+            break
+        eta = compute_eta(p, g)
+        s = p * eta
+        S[:, k] = s
+        x = x + s
+        err[k+1] = np.linalg.norm(x-1)
+        y = T @ s
+        Y[:, k] = y
+        rho = 1.0 / np.dot(s, y)
+        rhovec[k] = rho
     return x, err
 
 if __name__ == '__main__':

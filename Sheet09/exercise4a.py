@@ -295,19 +295,13 @@ def show_heatmap(heatmap: np.ndarray, title: Optional[str] = None) -> None:
 
 if __name__ == '__main__':
 
-    # Choose an input image
     img_path = 'truck.jpg'
+    resnet_size = (224, 224)
 
-
-    model = tf.keras.applications.resnet50.ResNet50(include_top=True)
-
-    # TODO Use model.summary() to obtain the input size of the
-    # network, the name of the last convolutional layer, and the
-    # name of the classification layers, i.e. the name of the GAP
-    # layer and the SoftMax layer.
-    resnet_size = None
-    last_conv_layer_name = None
-    classifier_layer_names = None
+    model = get_model()
+    last_conv_layer_name = 'conv5_block3_out'
+    classifier_layer_names = ['avg_pool',
+                              'predictions']
 
     img = get_image(img_path, resnet_size)
 
